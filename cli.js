@@ -1,10 +1,10 @@
 #! /usr/bin/env node
 'use strict'
 
+const path = require('path')
 const app = require('commander')
-const c = require('ansi-colors')
-const logger = require('log-update')
 const compiler = require('./index.js')
+const { log } = require('./util.js')
 
 app
   .arguments('<input> <output>')
@@ -14,42 +14,38 @@ app
 const opts = {
   input: app.args[0],
   output: app.args[1],
+  css: app.css || path.basename(app.args[1], '.js') + '.css',
   jsx: app.jsx || 'React.createElement',
-  compress: !app.watch,
   watch: app.watch
 }
 
 const bundle = compiler(opts)
 
-let then = Date.now()
-
-function log (...args) {
-  logger(
-    c.gray(`@friendsof/roll`),
-    ...args
-  )
-}
-
 if (opts.watch) {
   bundle.watch()
     .start(() => {
       log('watching')
-      then = Date.now()
     })
-    .end(() => {
-      log(
+    .end(stats => {
+      log(c => ([
         c.green(`compiled`),
-        `in ${Date.now() - then}ms`
-      )
+        `in ${stats.duration}ms`
+      ]))
+    })
+    .error(err => {
+      log(c => ([
+        c.red(`error`),
+        err.message || err
+      ]))
     })
 } else {
   log('compiling')
 
-  bundle.compile()
-    .then(() => {
-      log(
+  bundle.build()
+    .end(stats => {
+      log(c => ([
         c.green(`compiled`),
-        `in ${Date.now() - then}ms`
-      )
+        `in ${stats.duration}ms`
+      ]))
     })
 }

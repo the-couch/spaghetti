@@ -1,121 +1,132 @@
+const fs = require('fs')
 const path = require('path')
-const rollup = require('rollup')
 const exit = require('exit')
 const c = require('ansi-colors')
-const { log } = require('./util.js')
+const webpack = require('webpack')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
 
-module.exports = function compiler (opts = {}) {
-  const inputs = {
-    input: opts.input,
-    plugins: [
-      require('@slater/rollup-plugin-postcss')({
-        extensions: [ '.css' ],
-        extract: true,
-        minimize: true,
-        sourceMap: true,
-        plugins: [
-          require('postcss-import')(),
-          require('postcss-cssnext')({
-            warnForDuplicates: false
-          }),
-          require('postcss-nested'),
-          require('postcss-discard-comments')
-        ]
-      }),
-      require('rollup-plugin-babel')({
-        exclude: 'node_modules/**',
-        babelrc: false,
-        presets: [
-          [require('@babel/preset-env').default, {
-            modules: false
-          }],
-          [require('@babel/preset-react').default, {
-            pragma: opts.jsx
-          }],
-        ],
-        plugins: [
-          [require('fast-async'), {
-            spec: true
-          }],
-          [require('@babel/plugin-proposal-object-rest-spread'), {
-            useBuiltIns: true,
-            loose: true
-          }],
-          require('@babel/plugin-proposal-class-properties')
-        ]
-      }),
-      require('rollup-plugin-node-resolve')({
-        jsnext: true,
-        main: true,
-        browser: true
-      }),
-      require('rollup-plugin-commonjs')(),
-      require('rollup-plugin-alias')({
-        resolve: [ '.js', '.css' ],
-        ...opts.alias
-      }),
-      opts.compress && (
-        require('rollup-plugin-uglify')({
-          output: {
-            preamble: opts.banner
+const { log, resolve, join } = require('./util.js')
+
+const userPostcssConfig = fs.existsSync(resolve('postcss.config.js'))
+const userBabelConfig = fs.existsSync(resolve('.babelrc'))
+
+module.exports = (opts = {}) => {
+  const compiler = webpack({
+    mode: opts.watch ? 'production' : 'development',
+    target: 'web',
+    performance: { hints: false },
+    devtool: 'cheap-module-source-map',
+    entry: resolve(opts.input),
+    output: {
+      path: resolve(path.dirname(opts.output)),
+      filename: path.basename(opts.output)
+    },
+    module: {
+      rules: [
+        Object.assign(
+          {
+            test: /\.js$/,
+            exclude: /node_modules/,
+            loader: require.resolve('babel-loader')
+          },
+          userBabelConfig ? {} : {
+            options: {
+              babelrc: false,
+              plugins: [
+                require.resolve('babel-plugin-lodash'),
+                require.resolve('@babel/plugin-syntax-object-rest-spread'),
+                require.resolve('@babel/plugin-proposal-class-properties')
+              ],
+              presets: [
+                [require.resolve('@babel/preset-env'), {
+                  targets: {
+                    ie: '11'
+                  }
+                }],
+                require.resolve('@babel/preset-react')
+              ]
+            }
           }
-        })
-      )
+        ),
+        {
+          test: /\.css$/,
+          exclude: /node_modules/,
+          use: ExtractTextPlugin.extract([
+            require.resolve('css-loader'),
+            {
+              loader: require.resolve('postcss-loader'),
+              options: {
+                plugins: [
+                  require('postcss-import'),
+                  require('postcss-nested'),
+                  require('postcss-cssnext')({
+                    warnForDuplicates: false
+                  }),
+                  require('postcss-discard-comments'),
+                  !opts.watch && require('cssnano')
+                ].filter(Boolean)
+              }
+            }
+          ])
+        }
+      ].filter(Boolean)
+    },
+    resolve: {
+      alias: {}
+    },
+    plugins: [
+      new webpack.optimize.OccurrenceOrderPlugin(),
+      new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
+      new ExtractTextPlugin(opts.css)
     ].filter(Boolean)
+  })
+
+  function emit(fns, data) {
+    fns && fns.map(f => f(data))
   }
 
-  const outputs = {
-    file: opts.output,
-    format: 'iife',
-    banner: opts.banner,
-    sourcemap: true
+  function methods (bundle) {
+    let fns = {
+      error: [
+        e => log(c.red('compilation'), e)
+      ]
+    }
+
+    emit(fns.start)
+
+    bundle((err, stats) => {
+      if (err || stats.hasErrors()) {
+        return emit(fns.error, err)
+      }
+
+      emit(fns.end, {
+        stats,
+        duration: stats.endTime - stats.startTime
+      })
+    })
+
+    return {
+      start (cb) {
+        fns.start = (fns.start || []).concat(cb)
+        return this
+      },
+      end (cb) {
+        fns.end = (fns.end || []).concat(cb)
+        return this
+      },
+      error (cb) {
+        fns.error = (fns.error || []).concat(cb)
+        return this
+      }
+    }
   }
 
   return {
-    compile () {
-      return rollup.rollup(inputs)
-        .then(bundle => {
-          return bundle.write(outputs)
-        })
-        .catch(e => log(c.red('compilation'), e.message || e))
+    build () {
+      return methods(done => compiler.run(done))
     },
     watch () {
-      const bundle = rollup.watch({
-        ...inputs,
-        output: outputs
-      })
-
-      log(bundle.tasks[0])
-
-      let listeners = {
-        ERROR: [
-          e => log(c.red('compilation'), e)
-        ],
-        FATAL: [
-          e => log(c.red('compilation'), e)
-        ]
-      }
-
-      bundle.on('event', ({ code, error }) => {
-        listeners[code] && listeners[code].map(l => l(error))
-      })
-
-      return {
-        ...bundle,
-        start (cb) {
-          listeners.START = (listeners.START || []).concat(cb)
-          return this
-        },
-        end (cb) {
-          listeners.END = (listeners.END || []).concat(cb)
-          return this
-        },
-        error (cb) {
-          listeners.ERROR = (listeners.ERROR || []).concat(cb)
-          listeners.FATAL = (listeners.FATAL || []).concat(cb)
-          return this
-        }
-      }
+      return methods(done => compiler.watch({}, done))
     }
   }
 }
