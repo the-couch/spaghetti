@@ -96,7 +96,7 @@ module.exports = (opts = {}) => {
 
     bundle((err, stats) => {
       if (err || stats.hasErrors()) {
-        return emit(fns.error, err)
+        return emit(fns.error, err || stats.compilation.errors)
       }
 
       emit(fns.end, {

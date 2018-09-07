@@ -35,7 +35,7 @@ if (opts.watch) {
     .error(err => {
       log(c => ([
         c.red(`error`),
-        err.message || err
+        err ? err.message || err : ''
       ]))
     })
 } else {
