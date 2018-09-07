@@ -7,19 +7,22 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin')
 
 const { log, resolve, join } = require('./util.js')
 
+/**
+ * TODO
+ */
 const userPostcssConfig = fs.existsSync(resolve('postcss.config.js'))
 const userBabelConfig = fs.existsSync(resolve('.babelrc'))
 
-module.exports = (opts = {}) => {
+module.exports = (config = {}) => {
   const compiler = webpack({
-    mode: opts.watch ? 'production' : 'development',
+    mode: config.watch ? 'production' : 'development',
     target: 'web',
     performance: { hints: false },
     devtool: 'cheap-module-source-map',
-    entry: resolve(opts.input),
+    entry: resolve(config.in),
     output: {
-      path: resolve(path.dirname(opts.output)),
-      filename: path.basename(opts.output)
+      path: config.outDir,
+      filename: config.filename + '.js'
     },
     module: {
       rules: [
@@ -63,7 +66,7 @@ module.exports = (opts = {}) => {
                     warnForDuplicates: false
                   }),
                   require('postcss-discard-comments'),
-                  !opts.watch && require('cssnano')
+                  !config.watch && require('cssnano')
                 ].filter(Boolean)
               }
             }
@@ -72,12 +75,15 @@ module.exports = (opts = {}) => {
       ].filter(Boolean)
     },
     resolve: {
-      alias: {}
+      alias: Object.keys(config.alias).reduce((alias, k) => {
+        alias[k] = resolve(config.alias[k])
+        return alias
+      }, {})
     },
     plugins: [
       new webpack.optimize.OccurrenceOrderPlugin(),
       new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
-      new ExtractTextPlugin(opts.css)
+      new ExtractTextPlugin((config.filename + '.css'))
     ].filter(Boolean)
   })
 

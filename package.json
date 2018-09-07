@@ -1,24 +1,24 @@
 {
-  "name": "@friendsof/roll",
+  "name": "@friendsof/spaghetti",
   "version": "0.0.1",
   "description": "\"Zero config\" compiler for JS & CSS.",
   "main": "index.js",
   "bin": {
-    "roll": "./cli.js"
+    "spaghetti": "./cli.js"
   },
   "scripts": {
     "publish": "npm publish --access public"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/the-couch/roll.git"
+    "url": "git+ssh://git@github.com/the-couch/spaghetti.git"
   },
   "author": "estrattonbailey",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/the-couch/roll/issues"
+    "url": "https://github.com/the-couch/spaghetti/issues"
   },
-  "homepage": "https://github.com/the-couch/roll#readme",
+  "homepage": "https://github.com/the-couch/spaghetti#readme",
   "dependencies": {
     "@babel/core": "^7.0.0-beta.39",
     "@babel/plugin-proposal-class-properties": "^7.0.0-beta.39",
@@ -32,7 +32,6 @@
     "css-loader": "^0.28.10",
     "cssnano": "^4.0.0-rc.2",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
-    "@slater/rollup-plugin-postcss": "^1.6.2",
     "ansi-colors": "^3.0.4",
     "chokidar": "^2.0.4",
     "commander": "^2.17.1",

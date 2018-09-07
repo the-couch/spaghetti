@@ -1,32 +1,51 @@
-# @friendsof/roll
-"Zero config" compiler for JS & CSS.
+# @friendsof/spaghetti
+🍝 Tasty little compiler. Supports most modern JS syntax, and extracts CSS by default.
+
+## Install
+```bash
+npm i @friendsof/spaghetti -g # or --save-dev for npm scripts
+```
 
 ## Usage
-Install globally:
 ```bash
-npm i @friendsof/roll -g
-
-# build
-roll src/index.js dist/index.js
-
-# watch
-roll src/index.js dist/index.js -w
+spaghetti [options] <in> <outDir>
 ```
-Or per project:
+
+### Options
+#### `-f, --filename`
+Specify filename for both js and css output.
 ```bash
-npm i @friendsof/roll --save-dev
+spaghetti src/index.js dist/ -f bundle
+```
 
-# build
-./node_modules/.bin/roll src/index.js dist/index.js
+#### `-w, --watch`
+Watch files for changes.
+```bash
+spaghetti src/index.js dist/ -w
+```
 
-# watch
-./node_modules/.bin/roll src/index.js dist/index.js -w
+#### `--jsx`
+Specify a JSX pragma (default: `React.createElement`)
+```bash
+spaghetti src/index.js dist/ --jsx preact.h
+```
 
-# package.json
-{
-  "scripts": {
-    "build": "roll src/index.js dist/index.js",
-    "watch": "roll src/index.js dist/index.js -w",
+#### `--config`
+Specify a config file (default: `spaghetti.config.js`)
+```bash
+spaghetti src/index.js dist/ --config config.js
+```
+
+### Config
+Config files support the same options, with the addition of `alias`.
+```javascript
+// spaghetti.config.js
+module.exports = {
+  in: 'src/index.js',
+  outDir: 'dist',
+  filename: 'index',
+  alias: {
+    components: 'src/components/'
   }
 }
 ```

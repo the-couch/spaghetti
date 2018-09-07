@@ -5,12 +5,12 @@ const c = require('ansi-colors')
 function log (...args) {
   if (typeof args[0] === 'function') {
     logger(
-      c.gray(`roll`),
+      c.gray(`spaghetti`),
       ...[].concat(args[0](c))
     )
   } else {
     logger(
-      c.gray(`roll`),
+      c.gray(`spaghetti`),
       ...args
     )
   }
