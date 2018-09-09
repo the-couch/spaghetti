@@ -11,25 +11,21 @@ const { log, resolve, join } = require('./util.js')
 app
   .arguments('<in> <outDir>')
   .option('-w, --watch', 'watch ur files')
-  .option('-f, --filename', 'filename sans extension: --filename index')
-  .option('--css', 'css parser: --css scss (default: postcss)')
-  .option('--jsx', 'jsx pragma: --jsx preact.h (default: React.createElement)')
-  .option('--config', 'config file: --config config.js (default: spaghetti.config.js)')
+  .option('--jsx <pragma>', 'jsx pragma: --jsx preact.h (default: React.createElement)')
+  .option('--config <config>', 'config file: --config config.js (default: spaghetti.config.js)')
   .parse(process.argv)
 
 const input = app.args[0] || null
 const outDir = app.args[1] || null
-const filename = app.filename || input ? path.basename(input, '.js') : null
-const css = app.css ? app.css : 'postcss'
-const jsx = app.jsx || 'React.createElement'
+const filename = (input ? path.basename(input, '.js') : null)
 const watch = app.watch || false
+const jsx = app.jsx || 'React.createElement'
 const conf = resolve(app.config || 'spaghetti.config.js')
 
 let config = Object.assign({
   in: input,
   outDir,
   filename,
-  css,
   jsx,
   watch,
   alias: {}
@@ -40,6 +36,7 @@ let config = Object.assign({
  */
 config.in = resolve(config.in)
 config.outDir = resolve(config.outDir)
+config.filename = config.filename || path.basename(config.in, '.js')
 
 if (!config.filename) {
   log(c => ([

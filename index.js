@@ -3,7 +3,7 @@ const path = require('path')
 const exit = require('exit')
 const c = require('ansi-colors')
 const webpack = require('webpack')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const ExtractCSS = require('mini-css-extract-plugin')
 
 const { log, resolve, join } = require('./util.js')
 
@@ -38,7 +38,8 @@ module.exports = (config = {}) => {
               plugins: [
                 require.resolve('babel-plugin-lodash'),
                 require.resolve('@babel/plugin-syntax-object-rest-spread'),
-                require.resolve('@babel/plugin-proposal-class-properties')
+                require.resolve('@babel/plugin-proposal-class-properties'),
+                require.resolve('fast-async')
               ],
               presets: [
                 [require.resolve('@babel/preset-env'), {
@@ -52,9 +53,10 @@ module.exports = (config = {}) => {
           }
         ),
         {
-          test: /\.css$/,
+          test: /\.(sa|sc|c)ss$/,
           exclude: /node_modules/,
-          use: ExtractTextPlugin.extract([
+          use: [
+            ExtractCSS.loader,
             require.resolve('css-loader'),
             {
               loader: require.resolve('postcss-loader'),
@@ -69,8 +71,14 @@ module.exports = (config = {}) => {
                   !config.watch && require('cssnano')
                 ].filter(Boolean)
               }
+            },
+            {
+              loader: require.resolve('sass-loader'),
+              options: {
+                implementation: require('sass')
+              }
             }
-          ])
+          ]
         }
       ].filter(Boolean)
     },
@@ -83,7 +91,9 @@ module.exports = (config = {}) => {
     plugins: [
       new webpack.optimize.OccurrenceOrderPlugin(),
       new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
-      new ExtractTextPlugin((config.filename + '.css'))
+      new ExtractCSS({
+        filename: '[name].css'
+      })
     ].filter(Boolean)
   })
 

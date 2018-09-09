@@ -1,5 +1,6 @@
 # @friendsof/spaghetti
-🍝 Tasty little compiler. Supports most modern JS syntax, and extracts CSS by default.
+🍝 Tasty little compiler util. Supports most modern JS syntax, as well as compiles
+and extracts CSS (or SCSS) by default.
 
 ## Install
 ```bash
@@ -12,12 +13,6 @@ spaghetti [options] <in> <outDir>
 ```
 
 ### Options
-#### `-f, --filename`
-Specify filename for both js and css output.
-```bash
-spaghetti src/index.js dist/ -f bundle
-```
-
 #### `-w, --watch`
 Watch files for changes.
 ```bash
@@ -43,7 +38,7 @@ Config files support the same options, with the addition of `alias`.
 module.exports = {
   in: 'src/index.js',
   outDir: 'dist',
-  filename: 'index',
+  jsx: 'h',
   alias: {
     components: 'src/components/'
   }
