@@ -15,10 +15,10 @@ const userBabelConfig = fs.existsSync(resolve('.babelrc'))
 
 module.exports = (config = {}) => {
   const compiler = webpack({
-    mode: config.watch ? 'production' : 'development',
+    mode: config.watch ? 'development' : 'production',
     target: 'web',
     performance: { hints: false },
-    devtool: 'cheap-module-source-map',
+    devtool: 'source-map',
     entry: resolve(config.in),
     output: {
       path: config.outDir,
