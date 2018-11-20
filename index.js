@@ -10,7 +10,8 @@ const { log, resolve, join } = require('./util.js')
 /**
  * TODO
  */
-const userPostcssConfig = fs.existsSync(resolve('postcss.config.js'))
+// const userPostcssConfig = fs.existsSync(resolve('postcss.config.js'))
+
 const userBabelConfig = fs.existsSync(resolve('.babelrc'))
 
 module.exports = (config = {}) => {
@@ -58,7 +59,12 @@ module.exports = (config = {}) => {
           use: [
             ExtractCSS.loader,
             require.resolve('css-loader'),
-            {
+            config.sass ? {
+              loader: require.resolve('sass-loader'),
+              options: {
+                implementation: require('sass')
+              }
+            } : {
               loader: require.resolve('postcss-loader'),
               options: {
                 plugins: [
@@ -71,22 +77,13 @@ module.exports = (config = {}) => {
                   !config.watch && require('cssnano')
                 ].filter(Boolean)
               }
-            },
-            {
-              loader: require.resolve('sass-loader'),
-              options: {
-                implementation: require('sass')
-              }
             }
           ]
         }
       ].filter(Boolean)
     },
     resolve: {
-      alias: Object.keys(config.alias).reduce((alias, k) => {
-        alias[k] = resolve(config.alias[k])
-        return alias
-      }, {})
+      alias: config.alias || {}
     },
     plugins: [
       config.banner && new webpack.BannerPlugin({
