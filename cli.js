@@ -12,6 +12,8 @@ app
   .arguments('<in> <outDir>')
   .option('-w, --watch', 'watch ur files')
   .option('--jsx <pragma>', 'jsx pragma: --jsx preact.h (default: React.createElement)')
+  .option('--map <type>', 'any source map value supported by webpack: --map cheap-module-source-map (default: source-map)')
+  .option('--sass', 'use sass instead of postcss: --sass (default: false)')
   .option('--config <config>', 'config file: --config config.js (default: spaghetti.config.js)')
   .parse(process.argv)
 

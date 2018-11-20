@@ -25,6 +25,18 @@ Specify a JSX pragma (default: `React.createElement`)
 spaghetti src/index.js dist/ --jsx preact.h
 ```
 
+#### `--map`
+Any source map value supported by webpack (default: `source-map`)
+```bash
+spaghetti src/index.js dist/ --map cheap-module-source-map
+```
+
+#### `--sass`
+Use sass instead of postcss
+```bash
+spaghetti src/index.js dist/ --sass
+```
+
 #### `--config`
 Specify a config file (default: `spaghetti.config.js`)
 ```bash
@@ -32,7 +44,7 @@ spaghetti src/index.js dist/ --config config.js
 ```
 
 ### Config
-Config files support the same options, with the addition of `alias`.
+Config files support the same options as above, along with a couple additions.
 ```javascript
 // spaghetti.config.js
 module.exports = {
@@ -41,7 +53,8 @@ module.exports = {
   jsx: 'h',
   alias: {
     components: 'src/components/'
-  }
+  },
+  banner: '/** Hello there */'
 }
 ```
 

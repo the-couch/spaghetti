@@ -19,7 +19,7 @@ module.exports = (config = {}) => {
     mode: config.watch ? 'development' : 'production',
     target: 'web',
     performance: { hints: false },
-    devtool: 'source-map',
+    devtool: config.map || 'source-map',
     entry: resolve(config.in),
     output: {
       path: config.outDir,
