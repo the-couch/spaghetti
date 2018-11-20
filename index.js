@@ -89,6 +89,11 @@ module.exports = (config = {}) => {
       }, {})
     },
     plugins: [
+      config.banner && new webpack.BannerPlugin({
+        banner: config.banner,
+        raw: true,
+        entryOnly: true
+      }),
       new webpack.optimize.OccurrenceOrderPlugin(),
       new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
       new ExtractCSS({
