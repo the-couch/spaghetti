@@ -50,6 +50,6 @@
     "sass": "^1.13.2",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.20.2",
-    "webpack": "^4.0.1"
+    "webpack": "^4.26.0"
   }
 }
