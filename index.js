@@ -86,11 +86,13 @@ module.exports = (config = {}) => {
       alias: config.alias || {}
     },
     plugins: [
-      config.banner && new webpack.BannerPlugin({
-        banner: config.banner,
+      config.banner && new webpack.BannerPlugin(Object.assign({
         raw: true,
-        entryOnly: true
-      }),
+        entryOnly: true,
+        exclude: /\.(sa|sc|c)ss$/
+      }, typeof config.banner === 'object' ? config.banner : {
+        banner: config.banner
+      })),
       new webpack.optimize.OccurrenceOrderPlugin(),
       new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
       new ExtractCSS({
