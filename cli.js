@@ -14,6 +14,7 @@ app
   .option('--jsx <pragma>', 'jsx pragma: --jsx preact.h (default: React.createElement)')
   .option('--map <type>', 'any source map value supported by webpack: --map cheap-module-source-map (default: source-map)')
   .option('--sass', 'use sass instead of postcss: --sass (default: false)')
+  .option('--reload', 'enable live-reloading after changes: --reload (default: false)')
   .option('--config <config>', 'config file: --config config.js (default: spaghetti.config.js)')
   .parse(process.argv)
 
@@ -22,6 +23,7 @@ const outDir = app.args[1] || null
 const filename = (input ? path.basename(input, '.js') : null)
 const watch = app.watch || false
 const jsx = app.jsx || 'React.createElement'
+const reload = app.reload || false
 const conf = resolve(app.config || 'spaghetti.config.js')
 
 let config = Object.assign({
@@ -30,7 +32,8 @@ let config = Object.assign({
   filename,
   jsx,
   watch,
-  alias: {}
+  alias: {},
+  reload: false
 }, (fs.existsSync(conf) ? require(conf) : {}))
 
 /**
@@ -55,10 +58,10 @@ log('compiling')
 
 if (config.watch) {
   bundle.watch()
-    .end(stats => {
+    .end(({ duration }) => {
       log(c => ([
-        c.green(`compiled`),
-        `in ${stats.duration}ms`
+        c.green(`built`),
+        `in ${duration}ms`
       ]))
     })
     .error(err => {
@@ -69,10 +72,17 @@ if (config.watch) {
     })
 } else {
   bundle.build()
-    .end(stats => {
+    .end(({ duration, assets }) => {
+      log(c => `${c.green(`built`)} in ${duration}ms\n${assets.reduce((_, asset) => {
+          const size = asset.size.gzip ? asset.size.gzip + 'kb gzipped' : asset.size.raw + 'kb'
+          return _ += `  > ${c.green(asset.filename)} ${size}\n`
+        }, '')}
+      `)
+    })
+    .error(err => {
       log(c => ([
-        c.green(`compiled`),
-        `in ${stats.duration}ms`
+        c.red(`error`),
+        err ? err.message || err : ''
       ]))
     })
 }

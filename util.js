@@ -1,15 +1,14 @@
 const path = require('path')
-const logger = require('log-update')
 const c = require('ansi-colors')
 
 function log (...args) {
   if (typeof args[0] === 'function') {
-    logger(
+    console.log(
       c.gray(`spaghetti`),
       ...[].concat(args[0](c))
     )
   } else {
-    logger(
+    console.log(
       c.gray(`spaghetti`),
       ...args
     )
