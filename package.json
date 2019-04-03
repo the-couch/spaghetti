@@ -1,6 +1,6 @@
 {
   "name": "@friendsof/spaghetti",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Tasty little compiler util.",
   "main": "index.js",
   "bin": {
