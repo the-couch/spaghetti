@@ -51,6 +51,8 @@ module.exports = {
   in: 'src/index.js',
   outDir: 'dist',
   jsx: 'h',
+  sass: false, // set to true for sass
+  reload: true, // reloads on watch
   alias: {
     components: 'src/components/'
   },
@@ -59,4 +61,4 @@ module.exports = {
 ```
 
 ## License
-MIT License © [Friends of Friends](https://thecouch.nyc)
+MIT License © [The Couch](https://thecouch.nyc)
